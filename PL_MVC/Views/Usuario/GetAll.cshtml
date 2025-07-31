@@ -1,0 +1,89 @@
+﻿@model ML.Usuario
+
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Lista de Usuarios</h2>
+
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            <strong>Error:</strong> @ViewBag.ErrorMessage<br />
+            @ViewBag.Excepcion
+        </div>
+    }
+
+    <div class="row mb-3">
+        <div class="col text-end">
+            <a href="@Url.Action("Form", "Usuario")" class="btn btn-success">
+                <i class="bi bi-plus-circle-fill"></i> Agregar Usuario
+            </a>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Editar</th>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Rol</th>
+                    <th>Género</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Dirección Completa</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Usuarios != null && Model.Usuarios.Count > 0)
+                {
+                    foreach (ML.Usuario usuario in Model.Usuarios)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <a href="@Url.Action("Form", "Usuario", new { IdUsuario = usuario.IdUsuario })" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </td>
+                            <td>@usuario.NombreUsuario</td> 
+                            <td>@usuario.ApellidoPaterno @usuario.ApellidoMaterno</td>
+                            <td>@usuario.Correo</td>
+                            <td>@usuario.Telefono</td>
+                            <td>@usuario.Rol?.NombreRol</td> 
+                            <td>@usuario.Genero?.NombreGenero</td> 
+                            <td>@usuario.FechaNacimiento?.ToString("dd MMMM yyyy")</td>
+                            <td>
+                                @if (usuario.Direccion != null)
+                                {
+                                    @($"{usuario.Direccion.Calle} {usuario.Direccion.NumeroExterior} {usuario.Direccion.NumeroInterior} , " +
+                                        $"{usuario.Direccion.Colonia?.NombreColonia}, {usuario.Direccion.Municipio?.NombreMunicipio}, {usuario.Direccion.Estado?.NombreEstado}, CP: {usuario.Direccion.Colonia?.CodigoPostal}") 
+                                }
+                                else
+                                {
+                                    <em>Sin dirección</em>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a href="@Url.Action("Delete", "Usuario", new { IdUsuario = usuario.IdUsuario })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?');">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center">No hay usuarios registrados.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
