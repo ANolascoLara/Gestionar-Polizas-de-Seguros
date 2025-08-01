@@ -32,7 +32,6 @@ public partial class Usuario
     public virtual Genero? IdGeneroNavigation { get; set; }
 
     public virtual Rol? IdRolNavigation { get; set; }
-    public string? Calle { get; set; }
-    public string? NumeroInterior { get; set; }
-    public string? CodigoPostal { get; set; }
+
+    public virtual ICollection<PolizaUsuario> PolizaUsuarios { get; set; } = new List<PolizaUsuario>();
 }

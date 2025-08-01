@@ -4,10 +4,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<DL.SistemaGestionPolizaContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SistemaGestionPoliza")));
-builder.Services.AddScoped<BL.IUsuario, BL.Usuario>();
-builder.Services.AddScoped<BL.IRol, BL.Rol>();
+//builder.Services.AddDbContext<DL.SistemaGestionPolizaContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("SistemaGestionPoliza")));
+//builder.Services.AddScoped<BL.IUsuario, BL.Usuario>();
+//builder.Services.AddScoped<BL.IRol, BL.Rol>();
 
 
 var app = builder.Build();

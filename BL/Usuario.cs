@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,6 +102,92 @@ namespace BL
 
             return result;
         }
+
+        //public ML.Result GetAll(ML.Usuario usuario)
+        //{
+        //    ML.Result result = new ML.Result();
+
+        //    try
+        //    {
+
+        //        var usuarios = _context.GetAllUsuarios.FromSqlRaw("EXEC UsuarioGetAll").ToList();
+
+        //        result.Objects = new List<object>();
+
+        //        foreach (var u in usuarios)
+        //        {
+        //            ML.Usuario usuariobd = new ML.Usuario
+        //            {
+        //                IdUsuario = u.IdUsuario,
+        //                NombreUsuario = u.UsuarioNombre,
+        //                ApellidoPaterno = u.ApellidoPaterno,
+        //                ApellidoMaterno = u.ApellidoMaterno,
+        //                Correo = u.Correo,
+        //                Contraseña = u.Contraseña,
+        //                Telefono = u.Telefono,
+        //                FechaNacimiento = u.FechaNacimiento,
+        //                Imagen = u.Imagen,
+
+        //                Rol = new ML.Rol
+        //                {
+        //                    IdRol = u.IdRol,
+        //                    NombreRol = u.RolNombre
+        //                },
+
+        //                Genero = new ML.Genero
+        //                {
+        //                    IdGenero = u.IdGenero,
+        //                    NombreGenero = u.GeneroNombre
+        //                },
+
+
+        //                Direccion = (u.Calle != null || u.NumeroExterior != null || u.NumeroInterior != null ||
+        //                             u.ColoniaNombre != null || u.CodigoPostal != null ||
+        //                             u.MunicipioNombre != null || u.EstadoNombre != null)
+        //                            ? new ML.Direccion
+        //                            {
+        //                                Calle = u.Calle,
+        //                                NumeroExterior = u.NumeroExterior,
+        //                                NumeroInterior = u.NumeroInterior,
+
+        //                                Colonia = (u.ColoniaNombre != null || u.CodigoPostal != null)
+        //                                            ? new ML.Colonia
+        //                                            {
+        //                                                IdColonia = u.IdColonia.GetValueOrDefault(),
+        //                                                NombreColonia = u.ColoniaNombre,
+        //                                                CodigoPostal = u.CodigoPostal,
+        //                                            } : null,
+
+        //                                Municipio = u.MunicipioNombre != null
+        //                                            ? new ML.Municipio
+        //                                            {
+        //                                                IdMunicipio = u.IdMunicipio.GetValueOrDefault(),
+        //                                                NombreMunicipio = u.MunicipioNombre
+        //                                            } : null,
+
+        //                                Estado = u.EstadoNombre != null
+        //                                            ? new ML.Estado
+        //                                            {
+        //                                                IdEstado = u.IdEstado.GetValueOrDefault(),
+        //                                                NombreEstado = u.EstadoNombre
+        //                                            } : null
+        //                            } : null
+        //            };
+
+        //            result.Objects.Add(usuariobd);
+        //        }
+
+        //        result.Correct = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Correct = false;
+        //        result.ErrorMessage = "Ocurrió un error al obtener los usuarios.";
+        //        result.Ex = ex;
+        //    }
+
+        //    return result;
+        //}
 
         public ML.Result Delete(int IdUsuario)
         {
@@ -214,5 +301,82 @@ namespace BL
         }
 
 
+
+        public ML.Result Add(ML.Usuario usuario)
+        {
+            ML.Result result = new ML.Result();
+            try
+            {
+                var parameters = new[]
+                {
+                new SqlParameter("@Nombre", usuario.NombreUsuario),
+                new SqlParameter("@ApellidoPaterno", usuario.ApellidoPaterno),
+                new SqlParameter("@ApellidoMaterno", usuario.ApellidoMaterno),
+                new SqlParameter("@Correo", usuario.Correo),
+                new SqlParameter("@Contraseña", usuario.Contraseña),
+                new SqlParameter("@Telefono", usuario.Telefono),
+                new SqlParameter("@FechaNacimiento", usuario.FechaNacimiento),
+                new SqlParameter("@Imagen", usuario.Imagen ?? (object)DBNull.Value),
+                new SqlParameter("@IdRol", usuario.Rol.IdRol),
+                new SqlParameter("@IdGenero", usuario.Genero.IdGenero),
+                new SqlParameter("@Calle", usuario.Direccion.Calle),
+                new SqlParameter("@NumeroExterior", usuario.Direccion.NumeroExterior),
+                new SqlParameter("@NumeroInterior", usuario.Direccion.NumeroInterior ?? (object)DBNull.Value),
+                new SqlParameter("@IdColonia", usuario.Direccion.Colonia.IdColonia)
+            };
+
+                int filasAfectadas = _context.Database.ExecuteSqlRaw(
+                    "EXEC UsuarioAdd @Nombre, @ApellidoPaterno, @ApellidoMaterno, @Correo, @Contraseña, @Telefono, @FechaNacimiento, @Imagen, @IdRol, @IdGenero, @Calle, @NumeroExterior, @NumeroInterior, @IdColonia",
+                    parameters);
+
+                result.Correct = filasAfectadas > 0;
+            }
+            catch (Exception ex)
+            {
+                result.Correct = false;
+                result.ErrorMessage = ex.Message;
+                result.Ex = ex;
+            }
+            return result;
+        }
+
+        public ML.Result Update(ML.Usuario usuario)
+        {
+            ML.Result result = new ML.Result();
+            try
+            {
+                var parameters = new[]
+                {
+                new SqlParameter("@IdUsuario", usuario.IdUsuario),
+                new SqlParameter("@Nombre", usuario.NombreUsuario),
+                new SqlParameter("@ApellidoPaterno", usuario.ApellidoPaterno),
+                new SqlParameter("@ApellidoMaterno", usuario.ApellidoMaterno),
+                new SqlParameter("@Correo", usuario.Correo),
+                new SqlParameter("@Contraseña", usuario.Contraseña),
+                new SqlParameter("@Telefono", usuario.Telefono),
+                new SqlParameter("@FechaNacimiento", usuario.FechaNacimiento),
+                new SqlParameter("@Imagen", usuario.Imagen ?? (object)DBNull.Value),
+                new SqlParameter("@IdRol", usuario.Rol.IdRol),
+                new SqlParameter("@IdGenero", usuario.Genero.IdGenero),
+                new SqlParameter("@Calle", usuario.Direccion.Calle),
+                new SqlParameter("@NumeroExterior", usuario.Direccion.NumeroExterior),
+                new SqlParameter("@NumeroInterior", usuario.Direccion.NumeroInterior ?? (object)DBNull.Value),
+                new SqlParameter("@IdColonia", usuario.Direccion.Colonia.IdColonia)
+            };
+
+                int filasAfectadas = _context.Database.ExecuteSqlRaw(
+                    "EXEC UsuarioUpdate @IdUsuario, @Nombre, @ApellidoPaterno, @ApellidoMaterno, @Correo, @Contraseña, @Telefono, @FechaNacimiento, @Imagen, @IdRol, @IdGenero, @Calle, @NumeroExterior, @NumeroInterior, @IdColonia",
+                    parameters);
+
+                result.Correct = filasAfectadas > 0;
+            }
+            catch (Exception ex)
+            {
+                result.Correct = false;
+                result.ErrorMessage = ex.Message;
+                result.Ex = ex;
+            }
+            return result;
+        }
     }
 }

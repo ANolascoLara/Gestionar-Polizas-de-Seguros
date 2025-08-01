@@ -20,4 +20,6 @@ public partial class Poliza
     public virtual Estatus? IdEstatusNavigation { get; set; }
 
     public virtual TipoPoliza? IdTipoPolizaNavigation { get; set; }
+
+    public virtual ICollection<PolizaUsuario> PolizaUsuarios { get; set; } = new List<PolizaUsuario>();
 }

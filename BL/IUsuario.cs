@@ -8,10 +8,10 @@ namespace BL
 {
     public interface IUsuario
     {
-        ML.Result GetAll(ML.Usuario usuario);
-        ML.Result Delete(int IdUsuario);
-        ML.Result GetById(int IdUsuario);
-        ML.Result Add(ML.Usuario usuario);
-        ML.Result Update (ML.Usuario usuario);
+        public ML.Result GetAll(ML.Usuario usuario);
+        public ML.Result Delete(int IdUsuario);
+        public ML.Result GetById(int IdUsuario);
+        public ML.Result Add(ML.Usuario usuario);
+        public ML.Result Update(ML.Usuario usuario);
     }
 }

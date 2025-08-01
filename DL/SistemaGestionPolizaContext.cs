@@ -31,17 +31,20 @@ public partial class SistemaGestionPolizaContext : DbContext
 
     public virtual DbSet<Poliza> Polizas { get; set; }
 
+    public virtual DbSet<PolizaUsuario> PolizaUsuarios { get; set; }
+
     public virtual DbSet<Rol> Rols { get; set; }
 
     public virtual DbSet<TipoPoliza> TipoPolizas { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
-
-    public virtual DbSet<GetAllUsuario> GetAllUsuarios { get; set; } // Added this DbSet
+    public virtual DbSet<GetAllUsuario> GetAllUsuarios { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<GetAllUsuario>(entity => { entity.HasNoKey(); });
+
         modelBuilder.Entity<Colonium>(entity =>
         {
             entity.HasKey(e => e.IdColonia).HasName("PK__Colonia__A1580F668D73C3E0");
@@ -162,6 +165,21 @@ public partial class SistemaGestionPolizaContext : DbContext
                 .HasConstraintName("FK__Poliza__IdTipoPo__24927208");
         });
 
+        modelBuilder.Entity<PolizaUsuario>(entity =>
+        {
+            entity.HasKey(e => e.IdPolizaUsuario).HasName("PK__PolizaUs__2FE969A54AFF1540");
+
+            entity.ToTable("PolizaUsuario");
+
+            entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.PolizaUsuarios)
+                .HasForeignKey(d => d.IdUsuario)
+                .HasConstraintName("FK__PolizaUsu__IdUsu__440B1D61");
+
+            entity.HasOne(d => d.NumeroPolizaNavigation).WithMany(p => p.PolizaUsuarios)
+                .HasForeignKey(d => d.NumeroPoliza)
+                .HasConstraintName("FK__PolizaUsu__Numer__44FF419A");
+        });
+
         modelBuilder.Entity<Rol>(entity =>
         {
             entity.HasKey(e => e.IdRol).HasName("PK__Rol__2A49584CB674B123");
@@ -216,13 +234,6 @@ public partial class SistemaGestionPolizaContext : DbContext
             entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdRol)
                 .HasConstraintName("FK__Usuario__IdRol__2B3F6F97");
-        });
-
-        // Added this configuration for the GetAllUsuario DTO
-        modelBuilder.Entity<GetAllUsuario>(entity =>
-        {
-            entity.HasNoKey();
-            entity.ToView(null);
         });
 
         OnModelCreatingPartial(modelBuilder);
