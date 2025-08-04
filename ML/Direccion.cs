@@ -12,12 +12,7 @@ namespace ML
         public string? Calle { get; set; }
         public string? NumeroExterior { get; set; }
         public string? NumeroInterior { get; set; }
-        public int IdUsuario { get; set; }  // FK
 
-        public Usuario? Usuario { get; set; }
-        public int IdColonia { get; set; }
         public Colonia? Colonia { get; set; }
-        public Municipio? Municipio { get; set; }
-        public Estado? Estado { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BL
 {
-    public class Rol : IRol
+    public class Rol
     {
         private readonly DL.SistemaGestionPolizaContext _context;
 

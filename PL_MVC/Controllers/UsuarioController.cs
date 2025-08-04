@@ -1,65 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PL_MVC.Controllers
 {
+    [Authorize(Roles ="Admin")]
     public class UsuarioController : Controller
     {
-        //private readonly BL.IUsuario _usuarioService;
 
-        //public UsuarioController(BL.IUsuario usuarioService)
-        //{
-        //    _usuarioService = usuarioService;
-        //}
+        private readonly IConfiguration _configuration;
+
+        public UsuarioController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            //ML.Usuario usuario = new ML.Usuario();
 
-            //ML.Result result = _usuarioService.GetAll(usuario); 
+            //CRUD Usuario
+            ViewBag.UsuarioGetAllEndPoint = _configuration["EndPointsUsuario:UsuarioGetAllEndPoint"];
+            ViewBag.UsuarioGetByIdEndPoint = _configuration["EndPointsUsuario:UsuarioGetByIdEndPoint"];
+            ViewBag.UsuarioAddEndPoint = _configuration["EndPointsUsuario:UsuarioAddEndPoint"];
+            ViewBag.UsuarioUpdateEndPoint = _configuration["EndPointsUsuario:UsuarioUpdateEndPoint"];
+            ViewBag.UsuarioDeleteEndPoint = _configuration["EndPointsUsuario:UsuarioDeleteEndPoint"];
+            ViewBag.RolGetAllEndPoint = _configuration["EndPointsUsuario:RolGetAllEndPoint"];
 
-            //if (result.Correct && result.Objects != null)
-            //{
-            //    usuario.Usuarios = result.Objects.ToList(); 
-            //}
-            //else
-            //{
-            //    usuario.Usuarios = new List<object>();
-            //    ViewBag.ErrorMessage = result.ErrorMessage;
-            //    ViewBag.Excepcion = result.Ex?.Message;
-            //}
 
+            //Direccion
+
+            ViewBag.PaisGetAllEndPoint = _configuration["EndPointsDireccion:PaisGetAllEndPoint"];
+            ViewBag.EstadoGetByIdPaisEndPoint = _configuration["EndPointsDireccion:EstadoGetByIdPaisEndPoint"];
+            ViewBag.MunicipioGetByIdEstado = _configuration["EndPointsDireccion:MunicipioGetByIdEstado"];
+            ViewBag.ColoniaGetByIdMunicipio = _configuration["EndPointsDireccion:ColoniaGetByIdMunicipio"];
             return View();
         }
-
-        [HttpGet]
-        public IActionResult Form()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Form(ML.Usuario usuario)
-        {
-            return View();
-        }
-        //[HttpGet]
-        //public IActionResult Delete(int IdUsuario)
-        //{
-        //    ML.Result result = _usuarioService.Delete(IdUsuario);
-
-        //    if (result.Correct)
-        //    {
-        //        ViewBag.Message = "Usuario eliminado correctamente.";
-        //    }
-        //    else
-        //    {
-        //        ViewBag.ErrorMessage = result.ErrorMessage;
-        //        ViewBag.Excepcion = result.Ex?.Message;
-        //    }
-
-        //    return RedirectToAction("GetAll");
-        //}
 
     }
 }

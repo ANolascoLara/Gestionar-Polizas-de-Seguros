@@ -1,0 +1,321 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model ML.Poliza
+@{
+	var rol = User.IsInRole("Broke");
+}
+
+<style>
+	.ui-datepicker {
+		z-index: 1700 !important;
+	}
+
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+<h1>Pólizas</h1>
+<hr />
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-success" data-bs-target="#modalAgregarPoliza" onclick="openModal(0)">
+	Agregar Poliza
+</button>
+
+<div class="container mt-4">
+	<div class="row">
+		<div class="col-12">
+			<div class="table-responsive">
+				<table class="table table-striped table-bordered">
+					<thead class="table-dark">
+						<tr>
+							@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+							{
+								<th>Editar</th>
+								<th>Eliminar</th>
+							}
+
+							<th>Número Póliza</th>
+							<th>Tipo Póliza</th>
+
+							<th>Fecha Inicio</th>
+							<th>Fecha Fin</th>
+							<th>Monto Prima</th>
+							<th>Estatus</th>
+						</tr>
+					</thead>
+					<tbody id="polizaTableBody">
+						@foreach (ML.Poliza poliza in Model.Polizas)
+						{
+							<tr>
+								@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+								{
+
+									<td>
+										<button class="btn btn-sm btn-warning" onclick="GetById(@poliza.NumeroPoliza)">
+											<i class="bi bi-pencil-square"></i>
+										</button>
+									</td>
+									<td>
+										<button class="btn btn-sm btn-danger" onclick="DeletePoliza(@poliza.NumeroPoliza)">
+											<i class="bi bi-trash"></i>
+										</button>
+									</td>
+								}
+
+								<td>@poliza.NumeroPoliza</td>
+								<td>@poliza.TipoPoliza.Nombre</td>
+								<td>@poliza.FechaInicio</td>
+								<td>@poliza.FechaFinal</td>
+								<td>$@poliza.MontoPrima</td>
+								@if ((User.IsInRole("Admin") || User.IsInRole("Broker")) && poliza.Estatus.IdEstatus == 1)
+								{
+									<td>
+										@Html.DropDownListFor(model => model.Estatus.IdEstatus, new SelectList(Model.Estatus.Estatuss, "IdEstatus", "NombreEstatus"), new { @class = "form-select", onchange = $"cambiarEstatus(this, {poliza.NumeroPoliza})" })
+
+
+									</td>
+								}
+								else
+								{
+
+									<td>@poliza.Estatus.NombreEstatus</td>
+								}
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="modalAgregarPoliza" tabindex="-1" data-bs-backdrop="static" aria-labelledby="modalAgregarPolizaLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title" id="modalAgregarPolizaLabel">Agregar Póliza</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+			</div>
+			<div class="modal-body">
+
+				<input type="hidden" id="idUsuario" value="@ViewBag.IdUsuario" />
+
+				@* Rol Cliente *@
+
+				@if (User.Identity.IsAuthenticated && User.IsInRole("Cliente"))
+				{
+					<form id="formAgregarPoliza">
+						<input type="hidden" id="EsEdicion" value="false">
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label for="NumeroPoliza" class="form-label">Número de Póliza</label>
+								<input type="text" readonly class="form-control" id="NumeroPoliza" name="NumeroPoliza">
+							</div>
+							<div class="col-md-6">
+								<label for="MontoPrima" class="form-label">Monto Prima</label>
+								<input type="text" readonly class="form-control" id="MontoPrima" name="MontoPrima">
+							</div>
+
+							<div class="col-md-6">
+								<label for="FechaInicio" class="form-label">Fecha Inicio</label>
+								<input type="text" class="form-control" id="FechaInicio" name="FechaInicio" autocomplete="off">
+							</div>
+							<div class="col-md-6">
+								<label for="FechaFin" class="form-label">Fecha Fin</label>
+								<input type="text" readonly class="form-control" id="FechaFin" name="FechaFin" autocomplete="off">
+							</div>
+
+							<div class="col-md-6">
+								<label for="IdTipoPoliza" class="form-label">Tipo de Póliza</label>
+								<select class="form-select" id="IdTipoPoliza" name="IdTipoPoliza">
+									<option selected>Selecciona uno</option>
+									<!-- Opciones dinámicas -->
+								</select>
+							</div>
+
+
+							<div class="col-md-6 mt-3">
+								<label for="Genero" class="form-label">
+									<i class="bi bi-gender-ambiguous"></i> Género
+								</label>
+								<select class="form-select" id="IdGenero" name="IdGenero" onchange="calcularMonto(this)">
+									<option value="">Seleccione Uno</option>
+
+								</select>
+							</div>
+						</div>
+					</form>
+				}
+
+
+				@* Rol Broker *@
+
+
+				@if (User.Identity.IsAuthenticated && (User.IsInRole("Broker") || User.IsInRole("Admin")))
+				{
+					<form id="formAgregarPoliza">
+						<input type="hidden" id="EsEdicion" value="false">
+
+						<h5 class="mb-3">Datos del Cliente</h5>
+						<div class="row">
+							<div class="col-md-6">
+								<label for="NombreCliente" class="form-label">
+									<i class="bi bi-person-fill"></i> Nombre(s)
+								</label>
+								<input type="text" class="form-control" id="NombreCliente" name="NombreCliente" required>
+							</div>
+							<div class="col-md-6">
+								<label for="ApellidoCliente" class="form-label">
+									<i class="bi bi-person-lines-fill"></i> Apellido(s)
+								</label>
+								<input type="text" class="form-control" id="ApellidoCliente" name="ApellidoCliente" required>
+							</div>
+							<div class="col-md-6 mt-3">
+								<label for="Edad" class="form-label">
+									<i class="bi bi-calendar-heart-fill"></i> Fecha Nacimiento
+								</label>
+								<input type="text" class="form-control" id="FechaNacimiento" name="FechaNacimiento" required>
+							</div>
+							<div class="col-md-6 mt-3">
+								<label for="Genero" class="form-label">
+									<i class="bi bi-gender-ambiguous"></i> Género
+								</label>
+								<select class="form-select" id="IdGenero" name="IdGenero" onchange="calcularMonto(this)">
+									<option value="">Seleccione Uno</option>
+
+								</select>
+							</div>
+						</div>
+
+						<hr class="my-4">
+
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label for="NumeroPoliza" class="form-label">Número de Póliza</label>
+								<input type="text" readonly class="form-control" id="NumeroPoliza" name="NumeroPoliza">
+							</div>
+							<div class="col-md-6">
+								<label for="MontoPrima" class="form-label">Monto Prima</label>
+								<input type="text" readonly class="form-control" id="MontoPrima" name="MontoPrima">
+							</div>
+
+							<div class="col-md-6">
+								<label for="FechaInicio" class="form-label">Fecha Inicio</label>
+								<input type="text" class="form-control" id="FechaInicio" name="FechaInicio" autocomplete="off">
+							</div>
+							<div class="col-md-6">
+								<label for="FechaFin" class="form-label">Fecha Fin</label>
+								<input type="text" readonly class="form-control" id="FechaFin" name="FechaFin" autocomplete="off">
+							</div>
+
+							<div class="col-md-6">
+								<label for="IdTipoPoliza" class="form-label">Tipo de Póliza</label>
+								<select class="form-select" id="IdTipoPoliza" name="IdTipoPoliza">
+									<option selected disabled>Selecciona uno</option>
+									<!-- Opciones dinámicas -->
+								</select>
+							</div>
+
+
+						</div>
+					</form>
+				}
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-success" id="btnGuardarPoliza" onclick="guardar()">Guardar</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script>
+
+	var sessionRol = '@ViewBag.RolSession';
+	const estatusList = @Html.Raw(Json.Serialize(Model.Estatus.Estatuss));
+
+	var PolizaGetAllEndPoint = '@ViewBag.PolizaGetAllEndPoint';
+	var PolizaGetByIdEndPoint = '@ViewBag.PolizaGetByIdEndPoint';
+	var PolizaAddEndPoint = '@ViewBag.PolizaAddEndPoint';
+	var PolizaUpdateEndPoint = '@ViewBag.PolizaUpdateEndPoint';
+	var PolizaDeleteEndPoint = '@ViewBag.PolizaDeleteEndPoint';
+	var GeneroGetAllEndPoint = '@ViewBag.GeneroGetAllEndPoint';
+
+
+
+	var EstatusGetAllEndPoint = '@ViewBag.EstatusGetAllEndPoint';
+	var EstatusCambioEndPoint = '@ViewBag.EstatusCambioEndPoint';
+	var TipoPolizaGetAllEndPoint = '@ViewBag.TipoPolizaGetAllEndPoint';
+	var ObtenerNumeroPolizaEndPoint = '@ViewBag.ObtenerNumeroPolizaEndPoint';
+</script>
+
+<script src="~/js/poliza.js"></script>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- jQuery UI JS -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<script>
+				// Evita conflictos con otras librerías
+		var jq = jQuery.noConflict();
+
+	jq(document).ready(function () {
+		jq("#FechaInicio").datepicker({
+			dateFormat: "dd/mm/yy", // Puedes cambiar el formato
+
+			onSelect: function (selectedDate) {
+				let parts = selectedDate.split('/');
+				let fechaInicio = new Date(parts[2], parts[1] - 1, parts[0]);
+
+				let fechaFin = new Date(fechaInicio);
+				fechaFin.setMonth(fechaFin.getMonth() + 1);
+
+				// Corregir días inválidos (ej. 31 de enero -> 28 de febrero)
+				if (fechaFin.getDate() !== fechaInicio.getDate()) {
+					fechaFin.setDate(0); // último día del mes anterior
+				}
+
+				let dia = fechaFin.getDate().toString().padStart(2, '0');
+				let mes = (fechaFin.getMonth() + 1).toString().padStart(2, '0');
+				let año = fechaFin.getFullYear();
+
+				jq("#FechaFin").val(`${dia}/${mes}/${año}`);
+			}
+		});
+
+		jq('#FechaNacimiento').datepicker({
+			changeYear: true,
+			dateFormat: 'dd/mm/yy',
+			yearRange: '-100:-18',
+			maxDate: '-18Y',
+			showButtonPanel: true,
+				beforeShow: function(input, inst) {
+	  setTimeout(function() {
+		inst.dpDiv.css({
+		  zIndex: 1700
+		});
+	  }, 0);
+	}
+
+		}); //fin FechaNacimiento
+
+
+	}); //fin ready
+
+
+</script>

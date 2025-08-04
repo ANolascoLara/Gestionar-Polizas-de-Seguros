@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +20,34 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DL.SistemaGestionPolizaContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("SistemaGestionPoliza")));
 
-builder.Services.AddScoped<BL.IUsuario, BL.Usuario>();
-builder.Services.AddScoped<BL.IRol, BL.Rol>();
+builder.Services.AddScoped< BL.Usuario>();
+builder.Services.AddScoped<BL.Rol>();
+builder.Services.AddScoped<BL.Login>();
+builder.Services.AddScoped<BL.Poliza>();
+builder.Services.AddScoped<BL.TipoPoliza>();
+builder.Services.AddScoped<BL.Estatus>();
+builder.Services.AddScoped<BL.Pais>();
+builder.Services.AddScoped<BL.Estado>();
+builder.Services.AddScoped<BL.Municipio>();
+builder.Services.AddScoped<BL.Colonia>();
+builder.Services.AddScoped<BL.Genero>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = "localhost",
+            ValidAudience = "localhost",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("S3cr3t_k3y!.123_S3cr3t_k3y!.123.Pass@word1"))
+        };
+
+    });
 
 var app = builder.Build();
 

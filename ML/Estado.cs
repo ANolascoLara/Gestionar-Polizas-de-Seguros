@@ -14,7 +14,5 @@ namespace ML
         public int IdPais { get; set; }
         public Pais? Pais { get; set; }
 
-        
-        public ICollection<Municipio>? Municipios { get; set; }
     }
 }

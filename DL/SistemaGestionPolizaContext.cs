@@ -39,10 +39,12 @@ public partial class SistemaGestionPolizaContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
     public virtual DbSet<GetAllUsuario> GetAllUsuarios { get; set; } = null!;
+    public virtual DbSet<PolizaDTO> PolizaDTO { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<PolizaDTO>(entity => { entity.HasNoKey(); });
         modelBuilder.Entity<GetAllUsuario>(entity => { entity.HasNoKey(); });
 
         modelBuilder.Entity<Colonium>(entity =>

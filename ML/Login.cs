@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BL
+namespace ML
 {
-    public interface IRol
+    public class Login
     {
-        ML.Result GetAll();
+        public string? Email { get; set; }
+        public string? Password { get; set; }
     }
 }

@@ -1,185 +1,264 @@
-﻿@* @model ML.Usuario *@
-
-@* @{ *@
-@*     ViewData["Title"] = "Usuarios"; *@
-@* } *@
-
-@* <div class="container mt-4"> *@
-@*     <h2 class="text-center mb-4">Lista de Usuarios</h2> *@
-
-@*     @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage)) *@
-@*     { *@
-@*         <div class="alert alert-danger"> *@
-@*             <strong>Error:</strong> @ViewBag.ErrorMessage<br /> *@
-@*             @ViewBag.Excepcion *@
-@*         </div> *@
-@*     } *@
-
-@*     <div class="row mb-3"> *@
-@*         <div class="col text-end"> *@
-@*             <a href="@Url.Action("Form", "Usuario")" class="btn btn-success"> *@
-@*                 <i class="bi bi-plus-circle-fill"></i> Agregar Usuario *@
-@*             </a> *@
-@*             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> *@
-@*         </div> *@
-@*     </div> *@
-
-@*     <div class="table-responsive"> *@
-@*         <table class="table table-bordered table-hover table-striped align-middle"> *@
-@*             <thead class="table-dark text-center"> *@
-@*                 <tr> *@
-@*                     <th>Editar</th> *@
-@*                     <th>Nombre</th> *@
-@*                     <th>Apellidos</th> *@
-@*                     <th>Correo</th> *@
-@*                     <th>Teléfono</th> *@
-@*                     <th>Rol</th> *@
-@*                     <th>Género</th> *@
-@*                     <th>Fecha Nacimiento</th> *@
-@*                     <th>Dirección Completa</th> *@
-@*                     <th>Eliminar</th> *@
-@*                 </tr> *@
-@*             </thead> *@
-@*             <tbody> *@
-@*                 @if (Model.Usuarios != null && Model.Usuarios.Count > 0) *@
-@*                 { *@
-@*                     foreach (ML.Usuario usuario in Model.Usuarios) *@
-@*                     { *@
-@*                         <tr> *@
-@*                             <td class="text-center"> *@
-@*                                 <a href="@Url.Action("Form", "Usuario", new { IdUsuario = usuario.IdUsuario })" class="btn btn-warning btn-sm"> *@
-@*                                     <i class="bi bi-pencil-square"></i> *@
-@*                                 </a> *@
-@*                             </td> *@
-@*                             <td>@usuario.NombreUsuario</td>  *@
-@*                             <td>@usuario.ApellidoPaterno @usuario.ApellidoMaterno</td> *@
-@*                             <td>@usuario.Correo</td> *@
-@*                             <td>@usuario.Telefono</td> *@
-@*                             <td>@usuario.Rol?.NombreRol</td>  *@
-@*                             <td>@usuario.Genero?.NombreGenero</td>  *@
-@*                             <td>@usuario.FechaNacimiento?.ToString("dd MMMM yyyy")</td> *@
-@*                             <td> *@
-@*                                 @if (usuario.Direccion != null) *@
-@*                                 { *@
-@*                                     @($"{usuario.Direccion.Calle} {usuario.Direccion.NumeroExterior} {usuario.Direccion.NumeroInterior} , " + *@
-@*                                         $"{usuario.Direccion.Colonia?.NombreColonia}, {usuario.Direccion.Municipio?.NombreMunicipio}, {usuario.Direccion.Estado?.NombreEstado}, CP: {usuario.Direccion.Colonia?.CodigoPostal}")  *@
-@*                                 } *@
-@*                                 else *@
-@*                                 { *@
-@*                                     <em>Sin dirección</em> *@
-@*                                 } *@
-@*                             </td> *@
-@*                             <td class="text-center"> *@
-@*                                 <a href="@Url.Action("Delete", "Usuario", new { IdUsuario = usuario.IdUsuario })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?');"> *@
-@*                                     <i class="bi bi-trash-fill"></i> *@
-@*                                 </a> *@
-@*                             </td> *@
-@*                         </tr> *@
-@*                     } *@
-@*                 } *@
-@*                 else *@
-@*                 { *@
-@*                     <tr> *@
-@*                         <td colspan="10" class="text-center">No hay usuarios registrados.</td> *@
-@*                     </tr> *@
-@*                 } *@
-@*             </tbody> *@
-@*         </table> *@
-@*     </div> *@
-@* </div> *@
-
-@* @model ML.Usuario *@
-
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
 @{
-    ViewData["Title"] = "Usuarios";
 }
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+<h1>Usuarios</h1>
+<hr />
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-success" data-bs-target="#modalAgregarUsuario" onclick="openModal(0)">
+	Agregar Usuario
+</button>
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Lista de Usuarios</h2>
+	<div class="row">
+		<div class="col-12">
+			<div class="table-responsive">
+				<table class="table table-striped table-bordered">
+					<thead class="table-dark">
+						<tr>
+							<th>Editar</th>
+							<th>Eliminar</th>
 
-    @* @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage)) *@
-    @* { *@
-    @*     <div class="alert alert-danger"> *@
-    @*         <strong>Error:</strong> @ViewBag.ErrorMessage<br /> *@
-    @*         @ViewBag.Excepcion *@
-    @*     </div> *@
-    @* } *@
+							<th>Imagen</th>
+							<th>Nombre Completo</th>
+							<th>Teléfono</th>
+							<th>Edad</th>
+							<th>Rol</th>
+							<th>Genero</th>
+							<th>Direccion</th>
 
-    <div class="row mb-3">
-        <div class="col text-end">
-            <a href="@Url.Action("Form", "Usuario")" class="btn btn-success">
-                <i class="bi bi-plus-circle-fill"></i> Agregar Usuario
-            </a>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        </div>
-    </div>
+							<th>Ver Polizas</th>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover table-striped align-middle">
-            <thead class="table-dark text-center">
-                <tr>
-                    <th>Editar</th>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Correo</th>
-                    <th>Teléfono</th>
-                    <th>Rol</th>
-                    <th>Género</th>
-                    <th>Fecha Nacimiento</th>
-                    <th>Dirección Completa</th>
-                    <th>Eliminar</th>
-                </tr>
-            </thead>
-            <tbody id="tbody">
-                @* @if (Model.Usuarios != null && Model.Usuarios.Count > 0) *@
-                @* { *@
-                @*     foreach (ML.Usuario usuario in Model.Usuarios) *@
-                @*     { *@
-                @*         <tr> *@
-                @*             <td class="text-center"> *@
-                @*                 <a href="@Url.Action("Form", "Usuario", new { IdUsuario = usuario.IdUsuario })" class="btn btn-warning btn-sm"> *@
-                @*                     <i class="bi bi-pencil-square"></i> *@
-                @*                 </a> *@
-                @*             </td> *@
-                @*             <td>@usuario.NombreUsuario</td>  *@
-                @*             <td>@usuario.ApellidoPaterno @usuario.ApellidoMaterno</td> *@
-                @*             <td>@usuario.Correo</td> *@
-                @*             <td>@usuario.Telefono</td> *@
-                @*             <td>@usuario.Rol?.NombreRol</td>  *@
-                @*             <td>@usuario.Genero?.NombreGenero</td>  *@
-                @*             <td>@usuario.FechaNacimiento?.ToString("dd MMMM yyyy")</td> *@
-                @*             <td> *@
-                @*                 @if (usuario.Direccion != null) *@
-                @*                 { *@
-                @*                     @($"{usuario.Direccion.Calle} {usuario.Direccion.NumeroExterior} {usuario.Direccion.NumeroInterior} , " + *@
-                @*                         $"{usuario.Direccion.Colonia?.NombreColonia}, {usuario.Direccion.Municipio?.NombreMunicipio}, {usuario.Direccion.Estado?.NombreEstado}, CP: {usuario.Direccion.Colonia?.CodigoPostal}")  *@
-                @*                 } *@
-                @*                 else *@
-                @*                 { *@
-                @*                     <em>Sin dirección</em> *@
-                @*                 } *@
-                @*             </td> *@
-                @*             <td class="text-center"> *@
-                @*                 <a href="@Url.Action("Delete", "Usuario", new { IdUsuario = usuario.IdUsuario })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?');"> *@
-                @*                     <i class="bi bi-trash-fill"></i> *@
-                @*                 </a> *@
-                @*             </td> *@
-                @*         </tr> *@
-                @*     } *@
-                @* } *@
-                @* else *@
-                @* { *@
-                @*     <tr> *@
-                @*         <td colspan="10" class="text-center">No hay usuarios registrados.</td> *@
-                @*     </tr> *@
-                @* } *@
-            </tbody>
-        </table>
-    </div>
+						</tr>
+					</thead>
+					<tbody id="usuarioTableBody">
+						<!-- Filas generadas por JS -->
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </div>
 
-@section Scripts {
-    <!--JQuery UI CSS-->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"> <!--JQuery UI JS--> <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <script src="~/js/usuario.js"></script>
-}
+
+<!-- Modal -->
+<div class="modal fade" id="modalAgregarUsuario" tabindex="-1" aria-labelledby="modalAgregarUsuarioLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title" id="modalAgregarUsuarioLabel">Agregar Usuario</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+			</div>
+			<div class="modal-body">
+				<form id="formAgregarUsuario">
+					<input type="hidden" id="IdUsuario" value="0">
+
+					<div class="row g-3">
+						<!-- Campos usuario -->
+						<div class="col-md-6">
+							<label for="NombreUsuario" class="form-label">
+								<i class="bi bi-person-fill"></i> Nombre
+							</label>
+							<input type="text" class="form-control" id="NombreUsuario" name="NombreUsuario">
+						</div>
+						<div class="col-md-6">
+							<label for="ApellidoPaterno" class="form-label">
+								<i class="bi bi-person-fill"></i> Apellido Paterno
+							</label>
+							<input type="text" class="form-control" id="ApellidoPaterno" name="ApellidoPaterno">
+						</div>
+
+						<div class="col-md-6">
+							<label for="ApellidoMaterno" class="form-label">
+								<i class="bi bi-person-fill"></i> Apellido Materno
+							</label>
+							<input type="text" class="form-control" id="ApellidoMaterno" name="ApellidoMaterno">
+						</div>
+						<div class="col-md-6">
+							<label for="Correo" class="form-label">
+								<i class="bi bi-envelope-fill"></i> Correo Electrónico
+							</label>
+							<input type="email" class="form-control" id="Correo" name="Correo">
+						</div>
+
+						<div class="col-md-6">
+							<label for="Telefono" class="form-label">
+								<i class="bi bi-telephone-fill"></i> Teléfono
+							</label>
+							<input type="text" class="form-control" id="Telefono" name="Telefono">
+						</div>
+						<div class="col-md-6">
+							<label for="FechaNacimiento" class="form-label">
+								<i class="bi bi-calendar-event-fill"></i> Fecha de Nacimiento
+							</label>
+							<input type="text" class="form-control" id="FechaNacimiento" name="FechaNacimiento" autocomplete="off">
+						</div>
+
+						<div class="col-md-6">
+							<label for="IdRol" class="form-label">
+								<i class="bi bi-shield-lock-fill"></i> Rol
+							</label>
+							<select class="form-select" id="IdRol" name="IdRol">
+								<option selected disabled>Selecciona uno</option>
+								<!-- Opciones dinámicas -->
+							</select>
+						</div>
+
+						<div class="col-md-6">
+							<label class="form-label d-block">
+								<i class="bi bi-gender-ambiguous"></i> Género
+							</label>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="IdGenero" id="GeneroMasculino" value="1">
+								<label class="form-check-label" for="GeneroMasculino">Masculino</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="IdGenero" id="GeneroFemenino" value="2">
+								<label class="form-check-label" for="GeneroFemenino">Femenino</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="IdGenero" id="GeneroOtro" value="3">
+								<label class="form-check-label" for="GeneroOtro">Otro</label>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<label for="Contraseña" class="form-label">
+								<i class="bi bi-key-fill"></i> Contraseña
+							</label>
+							<input type="password" class="form-control" id="Contraseña" name="Contraseña">
+						</div>
+
+						<div class="col-md-6">
+							<label for="Imagen" class="form-label">
+								<i class="bi bi-image-fill"></i> Imagen
+							</label>
+							<input type="file" class="form-control" id="Imagen" name="Imagen" onchange="validarImagen(), previsualizarImagen()">
+
+							<img id="imgUsuario" class="mt-2" width="40%" />
+
+						</div>
+					</div>
+
+					<!-- Sección Dirección -->
+					<hr class="my-4">
+					<h5><i class="bi bi-geo-alt-fill"></i> Dirección</h5>
+
+					<div class="row g-3 mt-2">
+						<div class="col-md-6">
+							<label for="Calle" class="form-label">
+								<i class="bi bi-building"></i> Calle
+							</label>
+							<input type="text" class="form-control" id="Calle" name="Calle">
+						</div>
+						<div class="col-md-3">
+							<label for="NumeroInterior" class="form-label">
+								<i class="bi bi-door-open-fill"></i> Número Interior
+							</label>
+							<input type="text" class="form-control" id="NumeroInterior" name="NumeroInterior">
+						</div>
+						<div class="col-md-3">
+							<label for="NumeroExterior" class="form-label">
+								<i class="bi bi-door-closed-fill"></i> Número Exterior
+							</label>
+							<input type="text" class="form-control" id="NumeroExterior" name="NumeroExterior">
+						</div>
+
+						<div class="col-md-6">
+							<label for="IdPais" class="form-label">
+								<i class="bi bi-globe"></i> País
+							</label>
+							<select class="form-select" id="IdPais" name="IdPais" onchange="getEstadosPorPais(this.value)">
+								<option selected value="0">Selecciona uno</option>
+								<!-- Opciones dinámicas -->
+							</select>
+						</div>
+
+						<div class="col-md-6">
+							<label for="IdEstado" class="form-label">
+								<i class="bi bi-flag-fill"></i> Estado
+							</label>
+							<select class="form-select" id="IdEstado" name="IdEstado" onchange="getMunicipiosPorEstado(this.value)">
+								<option selected value="0">Selecciona uno</option>
+								<!-- Opciones dinámicas -->
+							</select>
+						</div>
+
+						<div class="col-md-6">
+							<label for="IdMunicipio" class="form-label">
+								<i class="bi bi-building"></i> Municipio
+							</label>
+							<select class="form-select" id="IdMunicipio" name="IdMunicipio" onchange="getColoniasPorMunicipio(this.value)">
+								<option selected value="0">Selecciona uno</option>
+								<!-- Opciones dinámicas -->
+							</select>
+						</div>
+
+						<div class="col-md-6">
+							<label for="IdColonia" class="form-label">
+								<i class="bi bi-geo-alt"></i> Colonia
+							</label>
+							<select class="form-select" id="IdColonia" name="IdColonia">
+								<option value="0">Selecciona uno</option>
+								<!-- Opciones dinámicas -->
+							</select>
+						</div>
+
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-success" id="btnGuardarUsuario" onclick="guardar()">Guardar</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script>
+	var UsuarioGetAllEndPoint = '@ViewBag.UsuarioGetAllEndPoint';
+	var UsuarioGetByIdEndPoint = '@ViewBag.UsuarioGetByIdEndPoint';
+	var UsuarioAddEndPoint = '@ViewBag.UsuarioAddEndPoint';
+	var UsuarioUpdateEndPoint = '@ViewBag.UsuarioUpdateEndPoint';
+	var UsuarioDeleteEndPoint = '@ViewBag.UsuarioDeleteEndPoint';
+	var RolGetAllEndPoint = '@ViewBag.RolGetAllEndPoint';
+
+
+
+	var PaisGetAllEndPoint = '@ViewBag.PaisGetAllEndPoint';
+	var EstadoGetByIdPaisEndPoint = '@ViewBag.EstadoGetByIdPaisEndPoint';
+	var MunicipioGetByIdEstado = '@ViewBag.MunicipioGetByIdEstado';
+	var ColoniaGetByIdMunicipio = '@ViewBag.ColoniaGetByIdMunicipio';
+
+
+</script>
+
+<script src="~/js/usuario.js"></script>
+<script src="~/js/direccion.js"></script>
+
+
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- jQuery UI JS -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<script>
+			// Evita conflictos con otras librerías
+	var jq = jQuery.noConflict();
+
+	jq(document).ready(function () {
+		jq("#FechaNacimiento").datepicker({
+			dateFormat: "dd/mm/yy" // Puedes cambiar el formato
+		});
+	});
+
+</script>

@@ -11,10 +11,7 @@ namespace ML
         public int IdMunicipio { get; set; }
         public string? NombreMunicipio { get; set; }
 
-        public int IdEstado { get; set; }
         public Estado? Estado { get; set; }
 
-       
-        public ICollection<Colonia>? Colonias { get; set; }
     }
 }

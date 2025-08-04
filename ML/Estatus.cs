@@ -10,5 +10,7 @@ namespace ML
     {
         public int? IdEstatus { get; set; }
         public string? NombreEstatus { get; set; }
+
+        public List<object>? Estatuss { get; set; }
     }
 }

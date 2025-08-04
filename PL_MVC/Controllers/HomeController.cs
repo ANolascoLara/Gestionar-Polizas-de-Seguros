@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PL_MVC.Models;
 
@@ -12,6 +13,13 @@ namespace PL_MVC.Controllers
         {
             _logger = logger;
         }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "TEST")]
 
         public IActionResult Index()
         {

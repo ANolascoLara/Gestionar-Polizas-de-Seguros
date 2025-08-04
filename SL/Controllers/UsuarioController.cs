@@ -1,4 +1,5 @@
 ﻿using BL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,46 +9,109 @@ namespace SL.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
-        private readonly IUsuario _usuario;
+        private readonly BL.Usuario _usuario;
 
-        public UsuarioController(IUsuario usuario)
+        public UsuarioController(BL.Usuario usuario)
         {
             _usuario = usuario;
         }
 
         [HttpGet]
-        [Route("UsuarioGetAll")]
-        public IActionResult UsuarioGetAll()
+        [Route("GetAll")]
+        public IActionResult GetAll()
         {
-            ML.Usuario usuario = new ML.Usuario();
-            var result = _usuario.GetAll(usuario);
-
+            ML.Result result = _usuario.GetAll();
             if (result.Correct)
             {
                 return Ok(result);
             }
             else
             {
-                return BadRequest();
+                return BadRequest(result);
             }
         }
 
         [HttpGet]
-        [Route("UsuarioGetById/{IdUsuario}")]
-        public IActionResult UsuarioGetById(int IdUsuario)
+        [Route("GetById/{IdUsuario}")]
+        public IActionResult GetById(int IdUsuario)
         {
-            var result = _usuario.GetById(IdUsuario);
-
+            ML.Result result = _usuario.GetById(IdUsuario);
             if (result.Correct)
             {
                 return Ok(result);
             }
-                
             else
             {
-                return BadRequest();
+                return BadRequest(result);
             }
-                
         }
+
+        [HttpDelete]
+        [Route("Delete/{IdUsuario}")]
+        public IActionResult Delete(int IdUsuario)
+        {
+            ML.Result result = _usuario.Delete(IdUsuario);
+            if (result.Correct)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
+        [HttpPost]
+        [Route("Add")]
+        public IActionResult Add([FromBody] ML.Usuario usuario)
+        {
+
+            if (!string.IsNullOrEmpty(usuario.ImagenBase64))
+            {
+                usuario.Imagen = ConvertirBase64ABytes(usuario.ImagenBase64);
+                usuario.ImagenBase64 = null;
+            }
+            
+
+            ML.Result result = _usuario.Add(usuario);
+            if (result.Correct)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
+        [HttpPut]
+        [Route("Update")]
+        public IActionResult Update([FromBody] ML.Usuario usuario)
+        {
+            if (!string.IsNullOrEmpty(usuario.ImagenBase64))
+            {
+                usuario.Imagen = ConvertirBase64ABytes(usuario.ImagenBase64);
+                usuario.ImagenBase64 = null;
+            }
+
+            ML.Result result = _usuario.Update(usuario);
+            if (result.Correct)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
+        private byte[] ConvertirBase64ABytes(string base64)
+        {
+            if (string.IsNullOrEmpty(base64))
+                return null;
+
+            return Convert.FromBase64String(base64);
+        }
+
     }
 }

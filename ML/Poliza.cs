@@ -9,13 +9,14 @@ namespace ML
     public class Poliza
     {
         public int? NumeroPoliza {  get; set; }
-        public DateTime? FechaInicio { get; set; }
-        public DateTime? FechaFinal { get; set; }
+        public string? FechaInicio { get; set; }
+        public string? FechaFinal { get; set; }
         public decimal? MontoPrima { get; set; }
-        public int? IdUsuario { get; set; }
-        public int? IdEstatus { get; set; }
-        public int? IdtipoPoliza { get; set; }
+        public ML.Usuario? Usuario { get; set; }
+        public ML.Estatus? Estatus { get; set; }
         public TipoPoliza? TipoPoliza { get; set; }
+
+        public List<object>? Polizas { get; set; }
 
     }
 }

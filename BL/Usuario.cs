@@ -1,14 +1,15 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BL
 {
-    public class Usuario : IUsuario
+    public class Usuario
     {
         private readonly DL.SistemaGestionPolizaContext _context;
 
@@ -17,79 +18,64 @@ namespace BL
             _context = context;
         }
 
-        public ML.Result GetAll(ML.Usuario usuario)
+        public ML.Result GetAll()
         {
             ML.Result result = new ML.Result();
 
             try
             {
 
-                var usuarios = _context.GetAllUsuarios.FromSqlRaw("EXEC UsuarioGetAll").ToList();
+                var usuarios = _context.GetAllUsuarios.FromSqlRaw("UsuarioGetAll").ToList();
 
                 result.Objects = new List<object>();
 
                 foreach (var u in usuarios)
                 {
-                    ML.Usuario usuariobd = new ML.Usuario
-                    {
-                        IdUsuario = u.IdUsuario,
-                        NombreUsuario = u.UsuarioNombre,
-                        ApellidoPaterno = u.ApellidoPaterno,
-                        ApellidoMaterno = u.ApellidoMaterno,
-                        Correo = u.Correo,
-                        Contraseña = u.Contraseña,
-                        Telefono = u.Telefono,
-                        FechaNacimiento = u.FechaNacimiento,
-                        Imagen = u.Imagen,
+                    ML.Usuario usuario = new ML.Usuario();
+                    usuario.Rol = new ML.Rol();
+                    usuario.Genero = new ML.Genero();
+                    usuario.Direccion = new ML.Direccion();
+                    usuario.Direccion.Colonia = new ML.Colonia();
+                    usuario.Direccion.Colonia.Municipio = new ML.Municipio();
+                    usuario.Direccion.Colonia.Municipio.Estado = new ML.Estado();
 
-                        Rol = new ML.Rol
-                        {
-                            IdRol = u.IdRol,
-                            NombreRol = u.RolNombre
-                        },
+                    // Datos personales
+                    usuario.IdUsuario = u.IdUsuario;
+                    usuario.NombreUsuario = u.UsuarioNombre;
+                    usuario.ApellidoPaterno = u.ApellidoPaterno;
+                    usuario.ApellidoMaterno = u.ApellidoMaterno;
+                    usuario.Correo = u.Correo;
+                    usuario.Contraseña = u.Contraseña;
+                    usuario.Telefono = u.Telefono;
+                    usuario.FechaNacimiento = u.FechaNacimiento;
+                    usuario.Imagen = u.Imagen;
 
-                        Genero = new ML.Genero
-                        {
-                            IdGenero = u.IdGenero,
-                            NombreGenero = u.GeneroNombre
-                        },
+                    // Rol
+                    usuario.Rol.IdRol = u.IdRol;
+                    usuario.Rol.NombreRol = u.RolNombre;
 
+                    // Género
+                    usuario.Genero.IdGenero = u.IdGenero;
+                    usuario.Genero.NombreGenero = u.GeneroNombre;
 
-                        Direccion = (u.Calle != null || u.NumeroExterior != null || u.NumeroInterior != null ||
-                                     u.ColoniaNombre != null || u.CodigoPostal != null ||
-                                     u.MunicipioNombre != null || u.EstadoNombre != null)
-                                    ? new ML.Direccion
-                                    {
-                                        Calle = u.Calle,
-                                        NumeroExterior = u.NumeroExterior,
-                                        NumeroInterior = u.NumeroInterior,
+                    // Dirección
+                    usuario.Direccion.Calle = u.Calle;
+                    usuario.Direccion.NumeroExterior = u.NumeroExterior;
+                    usuario.Direccion.NumeroInterior = u.NumeroInterior;
 
-                                        Colonia = (u.ColoniaNombre != null || u.CodigoPostal != null)
-                                                    ? new ML.Colonia
-                                                    {
-                                                        IdColonia = u.IdColonia.GetValueOrDefault(),
-                                                        NombreColonia = u.ColoniaNombre,
-                                                        CodigoPostal = u.CodigoPostal,
-                                                    } : null,
+                    usuario.Direccion.Colonia.IdColonia = u.IdColonia ?? 0;
+                    usuario.Direccion.Colonia.NombreColonia = u.ColoniaNombre;
+                    usuario.Direccion.Colonia.CodigoPostal = u.CodigoPostal;
 
-                                        Municipio = u.MunicipioNombre != null
-                                                    ? new ML.Municipio
-                                                    {
-                                                        IdMunicipio = u.IdMunicipio.GetValueOrDefault(),
-                                                        NombreMunicipio = u.MunicipioNombre
-                                                    } : null,
+                    usuario.Direccion.Colonia.Municipio.IdMunicipio = u.IdMunicipio ?? 0;
+                    usuario.Direccion.Colonia.Municipio.NombreMunicipio = u.MunicipioNombre;
 
-                                        Estado = u.EstadoNombre != null
-                                                    ? new ML.Estado
-                                                    {
-                                                        IdEstado = u.IdEstado.GetValueOrDefault(),
-                                                        NombreEstado = u.EstadoNombre
-                                                    } : null
-                                    } : null
-                    };
+                    usuario.Direccion.Colonia.Municipio.Estado.IdEstado = u.IdEstado ?? 0;
+                    usuario.Direccion.Colonia.Municipio.Estado.NombreEstado = u.EstadoNombre;
 
-                    result.Objects.Add(usuariobd);
+                    result.Objects.Add(usuario);
                 }
+
 
                 result.Correct = true;
             }
@@ -102,92 +88,6 @@ namespace BL
 
             return result;
         }
-
-        //public ML.Result GetAll(ML.Usuario usuario)
-        //{
-        //    ML.Result result = new ML.Result();
-
-        //    try
-        //    {
-
-        //        var usuarios = _context.GetAllUsuarios.FromSqlRaw("EXEC UsuarioGetAll").ToList();
-
-        //        result.Objects = new List<object>();
-
-        //        foreach (var u in usuarios)
-        //        {
-        //            ML.Usuario usuariobd = new ML.Usuario
-        //            {
-        //                IdUsuario = u.IdUsuario,
-        //                NombreUsuario = u.UsuarioNombre,
-        //                ApellidoPaterno = u.ApellidoPaterno,
-        //                ApellidoMaterno = u.ApellidoMaterno,
-        //                Correo = u.Correo,
-        //                Contraseña = u.Contraseña,
-        //                Telefono = u.Telefono,
-        //                FechaNacimiento = u.FechaNacimiento,
-        //                Imagen = u.Imagen,
-
-        //                Rol = new ML.Rol
-        //                {
-        //                    IdRol = u.IdRol,
-        //                    NombreRol = u.RolNombre
-        //                },
-
-        //                Genero = new ML.Genero
-        //                {
-        //                    IdGenero = u.IdGenero,
-        //                    NombreGenero = u.GeneroNombre
-        //                },
-
-
-        //                Direccion = (u.Calle != null || u.NumeroExterior != null || u.NumeroInterior != null ||
-        //                             u.ColoniaNombre != null || u.CodigoPostal != null ||
-        //                             u.MunicipioNombre != null || u.EstadoNombre != null)
-        //                            ? new ML.Direccion
-        //                            {
-        //                                Calle = u.Calle,
-        //                                NumeroExterior = u.NumeroExterior,
-        //                                NumeroInterior = u.NumeroInterior,
-
-        //                                Colonia = (u.ColoniaNombre != null || u.CodigoPostal != null)
-        //                                            ? new ML.Colonia
-        //                                            {
-        //                                                IdColonia = u.IdColonia.GetValueOrDefault(),
-        //                                                NombreColonia = u.ColoniaNombre,
-        //                                                CodigoPostal = u.CodigoPostal,
-        //                                            } : null,
-
-        //                                Municipio = u.MunicipioNombre != null
-        //                                            ? new ML.Municipio
-        //                                            {
-        //                                                IdMunicipio = u.IdMunicipio.GetValueOrDefault(),
-        //                                                NombreMunicipio = u.MunicipioNombre
-        //                                            } : null,
-
-        //                                Estado = u.EstadoNombre != null
-        //                                            ? new ML.Estado
-        //                                            {
-        //                                                IdEstado = u.IdEstado.GetValueOrDefault(),
-        //                                                NombreEstado = u.EstadoNombre
-        //                                            } : null
-        //                            } : null
-        //            };
-
-        //            result.Objects.Add(usuariobd);
-        //        }
-
-        //        result.Correct = true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        result.Correct = false;
-        //        result.ErrorMessage = "Ocurrió un error al obtener los usuarios.";
-        //        result.Ex = ex;
-        //    }
-
-        //    return result;
-        //}
 
         public ML.Result Delete(int IdUsuario)
         {
@@ -231,57 +131,52 @@ namespace BL
 
                 if (usuarioDL != null)
                 {
-                    result.Object = new ML.Usuario
-                    {
-                        IdUsuario = usuarioDL.IdUsuario,
-                        NombreUsuario = usuarioDL.UsuarioNombre,
-                        ApellidoPaterno = usuarioDL.ApellidoPaterno,
-                        ApellidoMaterno = usuarioDL.ApellidoMaterno,
-                        Correo = usuarioDL.Correo,
-                        Contraseña = usuarioDL.Contraseña,
-                        Telefono = usuarioDL.Telefono,
-                        FechaNacimiento = usuarioDL.FechaNacimiento,
-                        Imagen = usuarioDL.Imagen,
+                    ML.Usuario usuario = new ML.Usuario();
+                    usuario.IdUsuario = usuarioDL.IdUsuario;
+                    usuario.NombreUsuario = usuarioDL.UsuarioNombre;
+                    usuario.ApellidoPaterno = usuarioDL.ApellidoPaterno;
+                    usuario.ApellidoMaterno = usuarioDL.ApellidoMaterno;
+                    usuario.Correo = usuarioDL.Correo;
+                    usuario.Contraseña = usuarioDL.Contraseña;
+                    usuario.Telefono = usuarioDL.Telefono;
+                    usuario.FechaNacimiento = usuarioDL.FechaNacimiento;
+                    //usuario.Imagen = usuarioDL.Imagen;
+                    usuario.ImagenBase64 = usuarioDL.Imagen != null ? Convert.ToBase64String(usuarioDL.Imagen) : "";
 
-                        Rol = new ML.Rol
-                        {
-                            IdRol = usuarioDL.IdRol,
-                            NombreRol = usuarioDL.RolNombre
-                        },
-                        Genero = new ML.Genero
-                        {
-                            IdGenero = usuarioDL.IdGenero,
-                            NombreGenero = usuarioDL.GeneroNombre
-                        },
-                        Direccion = (usuarioDL.Calle != null || usuarioDL.NumeroExterior != null || usuarioDL.NumeroInterior != null ||
-                                     usuarioDL.ColoniaNombre != null || usuarioDL.CodigoPostal != null ||
-                                     usuarioDL.MunicipioNombre != null || usuarioDL.EstadoNombre != null)
-                                    ? new ML.Direccion
-                                    {
-                                        Calle = usuarioDL.Calle,
-                                        NumeroExterior = usuarioDL.NumeroExterior,
-                                        NumeroInterior = usuarioDL.NumeroInterior,
-                                        Colonia = (usuarioDL.ColoniaNombre != null || usuarioDL.CodigoPostal != null)
-                                                    ? new ML.Colonia
-                                                    {
-                                                        IdColonia = usuarioDL.IdColonia.GetValueOrDefault(),
-                                                        NombreColonia = usuarioDL.ColoniaNombre,
-                                                        CodigoPostal = usuarioDL.CodigoPostal,
-                                                    } : null,
-                                        Municipio = usuarioDL.MunicipioNombre != null
-                                                    ? new ML.Municipio
-                                                    {
-                                                        IdMunicipio = usuarioDL.IdMunicipio.GetValueOrDefault(),
-                                                        NombreMunicipio = usuarioDL.MunicipioNombre
-                                                    } : null,
-                                        Estado = usuarioDL.EstadoNombre != null
-                                                    ? new ML.Estado
-                                                    {
-                                                        IdEstado = usuarioDL.IdEstado.GetValueOrDefault(),
-                                                        NombreEstado = usuarioDL.EstadoNombre
-                                                    } : null
-                                    } : null
-                    };
+
+                    usuario.Rol = new ML.Rol();
+
+                    usuario.Rol.IdRol = usuarioDL.IdRol;
+                    usuario.Rol.NombreRol = usuarioDL.RolNombre;
+
+                    usuario.Genero = new ML.Genero();
+
+                    usuario.Genero.IdGenero = usuarioDL.IdGenero;
+                    usuario.Genero.NombreGenero = usuarioDL.GeneroNombre;
+
+                    usuario.Direccion = new ML.Direccion();
+                    usuario.Direccion.Calle = usuarioDL.Calle;
+                    usuario.Direccion.NumeroExterior = usuarioDL.NumeroExterior;
+                    usuario.Direccion.NumeroInterior = usuarioDL.NumeroInterior;
+
+                    usuario.Direccion.Colonia = new ML.Colonia();
+                    usuario.Direccion.Colonia.IdColonia = usuarioDL.IdColonia ?? 0;
+                    usuario.Direccion.Colonia.NombreColonia = usuarioDL.ColoniaNombre;
+                    usuario.Direccion.Colonia.CodigoPostal = usuarioDL.CodigoPostal;
+
+                    usuario.Direccion.Colonia.Municipio = new ML.Municipio();
+                    usuario.Direccion.Colonia.Municipio.IdMunicipio = usuarioDL.IdMunicipio ?? 0;
+                    usuario.Direccion.Colonia.Municipio.NombreMunicipio = usuarioDL.MunicipioNombre;
+
+                    usuario.Direccion.Colonia.Municipio.Estado = new ML.Estado();
+                    usuario.Direccion.Colonia.Municipio.Estado.IdEstado = usuarioDL.IdEstado ?? 0;
+                    usuario.Direccion.Colonia.Municipio.Estado.NombreEstado = usuarioDL.EstadoNombre;
+
+                    usuario.Direccion.Colonia.Municipio.Estado.Pais = new ML.Pais();
+                    usuario.Direccion.Colonia.Municipio.Estado.Pais.IdPais = usuarioDL.IdPais.Value;
+                    usuario.Direccion.Colonia.Municipio.Estado.Pais.NombrePais = usuarioDL.PaisNombre;
+
+                    result.Object = usuario;
                     result.Correct = true;
                 }
                 else
@@ -289,6 +184,7 @@ namespace BL
                     result.Correct = false;
                     result.ErrorMessage = "Usuario no encontrado.";
                 }
+
             }
             catch (Exception ex)
             {
